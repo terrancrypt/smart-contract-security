@@ -27,6 +27,12 @@ contract ReentrancyEtherTest is Test {
         reentrancyEther.deposit{value: AMOUNT_OF_OWNER}();
     }
 
+    modifier userDeposited() {
+        vm.prank(user);
+        reentrancyEther.deposit{value: AMOUNT_TO_DEPOSIT}();
+        _;
+    }
+
     function test_canDeposit() public {
         vm.prank(user);
         reentrancyEther.deposit{value: AMOUNT_TO_DEPOSIT}();
@@ -39,5 +45,29 @@ contract ReentrancyEtherTest is Test {
             AMOUNT_OF_OWNER + AMOUNT_TO_DEPOSIT,
             balanceOfContractAfterDeposit
         );
+    }
+
+    function test_canWithdraw() public userDeposited {
+        uint balanceOfContractBeforeWithdraw = address(reentrancyEther).balance;
+
+        vm.prank(user);
+        reentrancyEther.withdraw();
+
+        uint balanceOfUserAfterWithdraw = reentrancyEther.getBalance(user);
+        uint balanceOfContractAfterWithdraw = address(reentrancyEther).balance;
+
+        assertEq(balanceOfUserAfterWithdraw, 0);
+        assertEq(
+            balanceOfContractBeforeWithdraw - AMOUNT_TO_DEPOSIT,
+            balanceOfContractAfterWithdraw
+        );
+    }
+
+    function test_revertWithdrawIfInsufficientBalance() public {
+        vm.prank(user);
+        vm.expectRevert(
+            ReentrancyEther.ReentrancyEther_InsufficientBalance.selector
+        );
+        reentrancyEther.withdraw();
     }
 }

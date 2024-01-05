@@ -17,17 +17,19 @@ contract ReentrancyEther {
     }
 
     function withdraw() public payable {
-        if (s_balances[msg.sender] < msg.value) {
+        uint balance = s_balances[msg.sender];
+
+        if (balance <= 0) {
             revert ReentrancyEther_InsufficientBalance();
         }
 
-        (bool sent, ) = address(msg.sender).call{value: msg.value}("");
+        (bool sent, ) = address(msg.sender).call{value: balance}("");
 
         if (!sent) {
             revert ReentrancyEther_SendingError();
         }
 
-        s_balances[msg.sender] -= msg.value;
+        s_balances[msg.sender] = 0;
     }
 
     function getBalance(address _of) public view returns (uint) {
