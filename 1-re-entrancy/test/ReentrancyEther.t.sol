@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {Test} from "forge-std/Test.sol";
-import {ReentrancyEther} from "src/ReentrancyEther.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {ReentrancyEther, Attack} from "src/ReentrancyEther.sol";
 import {DeployReentrancyEther} from "script/DeployReentrancyEther.s.sol";
 
 contract ReentrancyEtherTest is Test {
@@ -11,9 +11,11 @@ contract ReentrancyEtherTest is Test {
 
     address owner = makeAddr("owner");
     address user = makeAddr("user");
+    address attacker = makeAddr("attacker");
 
     uint256 constant AMOUNT_OF_OWNER = 10 ether;
     uint256 constant AMOUNT_OF_USER = 2 ether;
+    uint256 constant AMOUNT_OF_ATTACKER = 1 ether;
     uint256 constant AMOUNT_TO_DEPOSIT = 1 ether;
 
     function setUp() external {
@@ -22,6 +24,7 @@ contract ReentrancyEtherTest is Test {
 
         deal(owner, AMOUNT_OF_OWNER);
         deal(user, AMOUNT_OF_USER);
+        deal(attacker, AMOUNT_OF_ATTACKER);
 
         vm.prank(owner);
         reentrancyEther.deposit{value: AMOUNT_OF_OWNER}();
@@ -69,5 +72,29 @@ contract ReentrancyEtherTest is Test {
             ReentrancyEther.ReentrancyEther_InsufficientBalance.selector
         );
         reentrancyEther.withdraw();
+    }
+
+    function test_canAttack() public userDeposited {
+        vm.startBroadcast();
+        Attack attackContract = new Attack(address(reentrancyEther));
+        vm.stopBroadcast();
+
+        vm.prank(attacker);
+        attackContract.deposit{value: AMOUNT_OF_ATTACKER}();
+
+        uint amoutOfAttackContractBeforeAttack = address(attackContract)
+            .balance;
+        console.log(
+            "Amount Of Attack Contract Before Attack",
+            amoutOfAttackContractBeforeAttack
+        );
+
+        attackContract.attack(AMOUNT_OF_ATTACKER);
+
+        uint amoutOfAttackContractAfterAttack = address(attackContract).balance;
+        console.log(
+            "Amount Of Attack Contract Before Attack",
+            amoutOfAttackContractAfterAttack
+        );
     }
 }
