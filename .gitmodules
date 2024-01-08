@@ -1,3 +1,6 @@
 [submodule "re-entrancy/lib/forge-std"]
 	path = re-entrancy/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "1-reentrancy/lib/openzeppelin-contracts"]
+	path = 1-reentrancy/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts

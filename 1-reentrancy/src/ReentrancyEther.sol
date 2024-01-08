@@ -3,12 +3,13 @@ pragma solidity ^0.8.0;
 
 contract ReentrancyEther {
     error ReentrancyEther_InsufficientBalance();
-    error ReentrancyEther_SendingError();
+    error ReentrancyEther_SendingEtherError();
+    error ReentrancyEther_NonReentrant();
 
-    mapping(address user => uint amount) public s_balances;
+    mapping(address user => uint amount) private s_balances;
 
-    event Deposited(address user, uint amount);
-    event Withdrawed(address user, uint amount);
+    event Deposited(address, uint);
+    event Withdrawed(address, uint);
 
     function deposit() public payable {
         s_balances[msg.sender] += msg.value;
@@ -19,25 +20,30 @@ contract ReentrancyEther {
     function withdraw() public payable {
         uint balance = s_balances[msg.sender];
 
+        // Checks
         if (balance <= 0) {
             revert ReentrancyEther_InsufficientBalance();
         }
 
+        // Interactions
         (bool sent, ) = address(msg.sender).call{value: balance}("");
 
         if (!sent) {
-            revert ReentrancyEther_SendingError();
+            revert ReentrancyEther_SendingEtherError();
         }
 
+        // Effects
         s_balances[msg.sender] = 0;
+
+        emit Withdrawed(msg.sender, balance);
     }
 
-    function getBalance(address _of) public view returns (uint) {
+    function getBalanceOf(address _of) external view returns (uint) {
         return s_balances[_of];
     }
 }
 
-contract Attack {
+contract AttackReentrancyEther {
     ReentrancyEther immutable i_target;
 
     constructor(address target) {
