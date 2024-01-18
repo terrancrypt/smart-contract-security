@@ -1,3 +1,6 @@
 [submodule "1-reentrancy"]
 	path = 1-reentrancy
 	url = https://github.com/terrancrypt/reentrancy-attack
+[submodule "2-denial-of-service"]
+	path = 2-denial-of-service
+	url = https://github.com/terrancrypt/denial-of-service
