@@ -4,3 +4,6 @@
 [submodule "2-denial-of-service"]
 	path = 2-denial-of-service
 	url = https://github.com/terrancrypt/denial-of-service
+[submodule "3-vulnerabilities-to-randomness"]
+	path = 3-vulnerabilities-to-randomness
+	url = https://github.com/terrancrypt/vulnerabilities-to-randomness
