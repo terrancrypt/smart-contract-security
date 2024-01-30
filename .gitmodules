@@ -7,3 +7,6 @@
 [submodule "3-vulnerabilities-to-randomness"]
 	path = 3-vulnerabilities-to-randomness
 	url = https://github.com/terrancrypt/vulnerabilities-to-randomness
+[submodule "3-private-state-variable"]
+	path = 3-private-state-variable
+	url = https://github.com/terrancrypt/private-state-variable
